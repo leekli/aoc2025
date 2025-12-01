@@ -51,7 +51,7 @@ func TestMakeMove_ShouldMoveLeft_NoMinNumCycleNeeded(t *testing.T) {
 	minNum := 0
 	maxNum := 99
 
-	newLocation := MakeMove(direction, numOfMoves, currentPosition, minNum, maxNum)
+	newLocation, _ := MakeMove(direction, numOfMoves, currentPosition, minNum, maxNum)
 
 	assert.Equal(t, 8, newLocation, "New location incorrect")
 }
@@ -63,7 +63,7 @@ func TestMakeMove_ShouldMoveRight_NoMinNumCycleNeeded(t *testing.T) {
 	minNum := 0
 	maxNum := 99
 
-	newLocation := MakeMove(direction, numOfMoves, currentPosition, minNum, maxNum)
+	newLocation, _ := MakeMove(direction, numOfMoves, currentPosition, minNum, maxNum)
 
 	assert.Equal(t, 10, newLocation, "New location incorrect")
 }
@@ -75,7 +75,7 @@ func TestMakeMove_ShouldMoveLeft_HitsMinNum_ShouldMoveToMaxNumCycleRound(t *test
 	minNum := 0
 	maxNum := 99
 
-	newLocation := MakeMove(direction, numOfMoves, currentPosition, minNum, maxNum)
+	newLocation, _ := MakeMove(direction, numOfMoves, currentPosition, minNum, maxNum)
 
 	assert.Equal(t, 99, newLocation, "New location incorrect")
 }
@@ -87,7 +87,7 @@ func TestMakeMove_ShouldMoveLeft_HitsMinNum_ShouldMoveToMaxNum_AndContinueWithLa
 	minNum := 0
 	maxNum := 99
 
-	newLocation := MakeMove(direction, numOfMoves, currentPosition, minNum, maxNum)
+	newLocation, _ := MakeMove(direction, numOfMoves, currentPosition, minNum, maxNum)
 
 	assert.Equal(t, 97, newLocation, "New location incorrect")
 }
@@ -99,7 +99,7 @@ func TestMakeMove_ShouldMoveRight_HitsMaxNum_ShouldMoveToMinNumCycleRound(t *tes
 	minNum := 0
 	maxNum := 99
 
-	newLocation := MakeMove(direction, numOfMoves, currentPosition, minNum, maxNum)
+	newLocation, _ := MakeMove(direction, numOfMoves, currentPosition, minNum, maxNum)
 
 	assert.Equal(t, 99, newLocation, "New location incorrect")
 }
@@ -111,15 +111,76 @@ func TestMakeMove_ShouldMoveRight_HitsMaxNum_ShouldMoveToMinNum_AndContinueWithL
 	minNum := 0
 	maxNum := 99
 
-	newLocation := MakeMove(direction, numOfMoves, currentPosition, minNum, maxNum)
+	newLocation, _ := MakeMove(direction, numOfMoves, currentPosition, minNum, maxNum)
 
 	assert.Equal(t, 2, newLocation, "New location incorrect")
 }
 
+func TestMakeMove_ShouldReturnNumOfZeroClicks_NoneWhenMovingRight(t *testing.T) {
+	direction := "R"
+	numOfMoves := 1
+	currentPosition := 97
+	minNum := 0
+	maxNum := 99
+
+	_, zeroClicksCount := MakeMove(direction, numOfMoves, currentPosition, minNum, maxNum)
+
+	assert.Equal(t, 0, zeroClicksCount, "Incorrect zero count")
+}
+
+func TestMakeMove_ShouldReturnNumOfZeroClicks_OneWhenMovingRight(t *testing.T) {
+	direction := "R"
+	numOfMoves := 3
+	currentPosition := 97
+	minNum := 0
+	maxNum := 99
+
+	_, zeroClicksCount := MakeMove(direction, numOfMoves, currentPosition, minNum, maxNum)
+
+	assert.Equal(t, 1, zeroClicksCount, "Incorrect zero count")
+}
+
+func TestMakeMove_ShouldReturnNumOfZeroClicks_NoneWhenMovingLeft(t *testing.T) {
+	direction := "L"
+	numOfMoves := 1
+	currentPosition := 3
+	minNum := 0
+	maxNum := 99
+
+	_, zeroClicksCount := MakeMove(direction, numOfMoves, currentPosition, minNum, maxNum)
+
+	assert.Equal(t, 0, zeroClicksCount, "Incorrect zero count")
+}
+
+func TestMakeMove_ShouldReturnNumOfZeroClicks_OneWhenMovingLeft(t *testing.T) {
+	direction := "L"
+	numOfMoves := 3
+	currentPosition := 1
+	minNum := 0
+	maxNum := 99
+
+	_, zeroClicksCount := MakeMove(direction, numOfMoves, currentPosition, minNum, maxNum)
+
+	assert.Equal(t, 1, zeroClicksCount, "Incorrect zero count")
+}
+
+func TestMakeMove_ShouldReturnNumOfZeroClicks_CountMultipleTimes(t *testing.T) {
+	direction := "R"
+	numOfMoves := 1000
+	currentPosition := 50
+	minNum := 0
+	maxNum := 99
+
+	_, zeroClicksCount := MakeMove(direction, numOfMoves, currentPosition, minNum, maxNum)
+
+	assert.Equal(t, 10, zeroClicksCount, "Incorrect zero count")
+}
+
 func TestPart1_ShouldRunInstructions_SingleInstruction_NoZerosHit(t *testing.T) {
 	input := "L68"
+	minNum, maxNum, startingPosition := 0, 99, 50
 
-	output := Part1(input)
+	output := Part1(input, minNum, maxNum, startingPosition)
 
 	assert.Equal(t, 0, output, "Incorrect password output")
 }
@@ -128,8 +189,9 @@ func TestPart1_ShouldRunInstructions_MultipleInstructions_ZeroHitOnce(t *testing
 	input := `L68
 L30
 R48`
+	minNum, maxNum, startingPosition := 0, 99, 50
 
-	output := Part1(input)
+	output := Part1(input, minNum, maxNum, startingPosition)
 
 	assert.Equal(t, 1, output, "Incorrect password output")
 }
@@ -145,8 +207,56 @@ L1
 L99
 R14
 L82`
+	minNum, maxNum, startingPosition := 0, 99, 50
 
-	output := Part1(input)
+	output := Part1(input, minNum, maxNum, startingPosition)
 
 	assert.Equal(t, 3, output, "Incorrect password output")
+}
+
+func TestPart2_ShouldRunInstructions_SingleInstruction_NoZerosHit(t *testing.T) {
+	input := "L1"
+	minNum, maxNum, startingPosition := 0, 99, 50
+
+	output := Part2(input, minNum, maxNum, startingPosition)
+
+	assert.Equal(t, 0, output, "Incorrect zero hit count")
+}
+
+func TestPart2_ShouldRunInstructions_SingleInstruction_OneZeroHit(t *testing.T) {
+	input := "L68"
+	minNum, maxNum, startingPosition := 0, 99, 50
+
+	output := Part2(input, minNum, maxNum, startingPosition)
+
+	assert.Equal(t, 1, output, "Incorrect zero hit count")
+}
+
+func TestPart2_ShouldRunInstructions_MultipleInstructions_MultipleZerosHit(t *testing.T) {
+	input := `L68
+L30
+R48`
+	minNum, maxNum, startingPosition := 0, 99, 50
+
+	output := Part2(input, minNum, maxNum, startingPosition)
+
+	assert.Equal(t, 2, output, "Incorrect zero hit count")
+}
+
+func TestPart2_ShouldRunInstructions_WorksWithPuzzleTestFullInput(t *testing.T) {
+	input := `L68
+L30
+R48
+L5
+R60
+L55
+L1
+L99
+R14
+L82`
+	minNum, maxNum, startingPosition := 0, 99, 50
+
+	output := Part2(input, minNum, maxNum, startingPosition)
+
+	assert.Equal(t, 6, output, "Incorrect zero hit count")
 }
