@@ -21,9 +21,9 @@ func main() {
 	fmt.Printf("Day 3, Part 1 Output: %d\n", p1Output)
 
 	// Part 2
-	//p2Output := Part2(rawInput)
+	p2Output := Part2(rawInput)
 
-	//fmt.Printf("Day 3, Part 2 Output: %d\n", p2Output)
+	fmt.Printf("Day 3, Part 2 Output: %d\n", p2Output)
 }
 
 func Part1(input string) int {
@@ -45,7 +45,25 @@ func Part1(input string) int {
 }
 
 func Part2(input string) int {
-	return 0
+	// Approach to Part 1 isn't going work here! - “remove k digits to form the largest possible number”, greedy stack based algo, could go back and refactor part 1 now but won't
+
+	total := 0
+
+	batteryBanks := ConvertRangesToList(input)
+
+	for i := 0; i < len(batteryBanks); i++ {
+		batteriesFound := FindTwelveJoltages(batteryBanks[i])
+
+		batteriesFoundInt, err := strconv.Atoi(batteriesFound)
+
+		if err != nil {
+			panic(err)
+		}
+
+		total += batteriesFoundInt
+	}
+
+	return total
 }
 
 func readFileToString(filePath string) (string, error) {
@@ -149,4 +167,32 @@ func FindSecondBattery(bank string, highestNum int, highestNumIndex int) int {
 	}
 
 	return secondHighestNum
+}
+
+func FindTwelveJoltages(bank string) string {
+	joltagesFound := []int{}
+
+	lengthOfBank := len(bank)
+
+	batteriesRequired := 12
+	batteriesToRemove := lengthOfBank - batteriesRequired
+
+	bankInts := ConvertBankSliceToInts(bank)
+
+	for i := 0; i < len(bankInts); i++ {
+		for len(joltagesFound) != 0 && joltagesFound[len(joltagesFound) - 1] < bankInts[i] && batteriesToRemove > 0 {
+			joltagesFound = joltagesFound[:len(joltagesFound) - 1]
+			batteriesToRemove--
+		}
+
+		joltagesFound = append(joltagesFound, bankInts[i])
+	}
+
+	if batteriesToRemove > 0 {
+		joltagesFound = joltagesFound[:len(joltagesFound) - batteriesToRemove]
+	}
+
+	joltagesAsString := ConvertBankSliceToStrs(joltagesFound)
+
+	return strings.Join(joltagesAsString, "")
 }

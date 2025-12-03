@@ -243,3 +243,40 @@ func TestPart1_TestInput(t *testing.T) {
 
 	assert.Equal(t, 357, output, "Output should be 357")
 }
+
+func TestFindTwelveJoltages_ReturnsJoltages(t *testing.T) {
+	input := "987654321111111"
+
+	output := FindTwelveJoltages(input)
+
+	assert.Equal(t, "987654321111", output, "Output should be 987654321111")
+
+	input = "811111111111119"
+
+	output = FindTwelveJoltages(input)
+
+	assert.Equal(t, "811111111119", output, "Output should be 811111111119")
+
+	input = "234234234234278"
+
+	output = FindTwelveJoltages(input)
+
+	assert.Equal(t, "434234234278", output, "Output should be 434234234278")
+
+	input = "818181911112111"
+
+	output = FindTwelveJoltages(input)
+
+	assert.Equal(t, "888911112111", output, "Output should be 888911112111")
+}
+
+func TestPart2_TestInput(t *testing.T) {
+	input := `987654321111111
+811111111111119
+234234234234278
+818181911112111`
+
+	output := Part2(input)
+
+	assert.Equal(t, 3121910778619, output, "Output should be 3121910778619")
+}
