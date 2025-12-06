@@ -20,15 +20,88 @@ func main() {
 	fmt.Printf("Day 4, Part 1 Output: %d\n", p1Output)
 
 	// Part 2
-	//p2Output := Part2(rawInput)
+	p2Output := Part2(rawInput)
 
-	//fmt.Printf("Day 4, Part 2 Output: %d\n", p2Output)
+	fmt.Printf("Day 4, Part 2 Output: %d\n", p2Output)
 }
 
 func Part1(input string) int {
 	totalRollsAccessible := 0
 
 	grid := StringTo2DArray(input)
+
+	totalRollsAccessible, _ = FindAndTrackAllAcessibleRolls(grid)
+
+	return totalRollsAccessible
+}
+
+func Part2(input string) int {
+	overallTotalRollsAccessible := 0
+
+	grid := StringTo2DArray(input)
+
+	totalToCheckBeforeReLoop := 9999
+
+	for totalToCheckBeforeReLoop != 0 {
+		totalRollsAccessible, trackingGrid := FindAndTrackAllAcessibleRolls(grid)
+		grid = UpdateGridWithTrackingGrid(grid, trackingGrid)
+
+		if totalRollsAccessible > 0 {
+			overallTotalRollsAccessible += totalRollsAccessible
+		}
+
+		totalToCheckBeforeReLoop = totalRollsAccessible
+	}
+
+	return overallTotalRollsAccessible
+}
+
+func readFileToString(filePath string) (string, error) {
+	content, err := os.ReadFile(filePath)
+
+	if err != nil {
+		return "", err
+	}
+	
+	return string(content), nil
+}
+
+func StringTo2DArray(input string) [][]string {
+    lineRows := strings.Split(input, "\n")
+
+    var wordSearchArray [][]string
+
+    for _, lineRow := range lineRows {
+        splitChars := strings.Split(lineRow, "")
+
+        var finalChars []string
+
+        for _, numStr := range splitChars {
+
+            finalChars = append(finalChars, numStr)
+        }
+
+        wordSearchArray = append(wordSearchArray, finalChars)
+    }
+
+    return wordSearchArray
+}
+
+
+func IsPaperRollFound(item string) bool {
+	rollFound := false
+
+	if item == "@" {
+		rollFound = true
+	}
+
+	return rollFound
+}
+
+func FindAndTrackAllAcessibleRolls(grid [][]string) (int, [][]bool) {
+	totalRollsAccessible := 0
+
+	trackingGrid := CreateTrackingGrid(grid)
 
 	for i := 0; i < len(grid); i++ {
 		for j := 0; j < len(grid[i]); j++ {
@@ -115,56 +188,37 @@ func Part1(input string) int {
 
 				if currentGridLocation == "@" && totalAdjacentRolls < 4 {
 					totalRollsAccessible++
+
+					// Use tracking grid to keep track of which rolls need changing in the main grid to an 'x'
+					trackingGrid[i][j] = true
 				}
 			}
 		}
 	}
 
-	return totalRollsAccessible
+	return totalRollsAccessible, trackingGrid
 }
 
-func Part2(input string) int {
-	return 0
-}
+func CreateTrackingGrid(gridToCopy [][]string) [][]bool {
+    trackingGrid := make([][]bool, len(gridToCopy))
 
-func readFileToString(filePath string) (string, error) {
-	content, err := os.ReadFile(filePath)
-
-	if err != nil {
-		return "", err
-	}
-	
-	return string(content), nil
-}
-
-func StringTo2DArray(input string) [][]string {
-    lineRows := strings.Split(input, "\n")
-
-    var wordSearchArray [][]string
-
-    for _, lineRow := range lineRows {
-        splitChars := strings.Split(lineRow, "")
-
-        var finalChars []string
-
-        for _, numStr := range splitChars {
-
-            finalChars = append(finalChars, numStr)
-        }
-
-        wordSearchArray = append(wordSearchArray, finalChars)
+    for i := range gridToCopy {
+        trackingGrid[i] = make([]bool, len(gridToCopy[i]))
     }
 
-    return wordSearchArray
+	return trackingGrid
 }
 
+func UpdateGridWithTrackingGrid(originalGrid [][]string, trackingGrid [][]bool) [][]string {
+	for i := 0; i < len(trackingGrid); i++ {
+		for j := 0; j < len(trackingGrid[i]); j++ {
+			currentElement := trackingGrid[i][j]
 
-func IsPaperRollFound(item string) bool {
-	rollFound := false
-
-	if item == "@" {
-		rollFound = true
+			if currentElement == true {
+				originalGrid[i][j] = "x"
+			}
+		}
 	}
 
-	return rollFound
+	return originalGrid
 }
