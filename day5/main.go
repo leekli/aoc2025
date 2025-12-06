@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -21,9 +22,9 @@ func main() {
 	fmt.Printf("Day 5, Part 1 Output: %d\n", p1Output)
 
 	// Part 2
-	//p2Output := Part2(rawInput)
+	p2Output := Part2(rawInput)
 
-	//fmt.Printf("Day 5, Part 2 Output: %d\n", p2Output)
+	fmt.Printf("Day 5, Part 2 Output: %d\n", p2Output)
 }
 
 func Part1(input string) int {
@@ -37,7 +38,13 @@ func Part1(input string) int {
 }
 
 func Part2(input string) int {
-	return 0
+	total := 0
+
+	idRanges, _ := GetIngredientsData(input)
+
+	total = GetTotalUniqueIDsInRanges(idRanges)
+
+	return total
 }
 
 func readFileToString(filePath string) (string, error) {
@@ -124,4 +131,50 @@ func GetTotalFreshAvailableIngredients(idRanges []string, availableIDs []int) in
 	}
 
 	return total
+}
+
+func GetTotalUniqueIDsInRanges(idRanges []string) int {
+    type interval struct { 
+		start, end int 
+	}
+
+    intervals := make([]interval, 0, len(idRanges))
+
+    // Parse ranges into the interval struct
+    for _, idRange := range idRanges {
+        parts := strings.Split(idRange, "-")
+
+        start, _ := strconv.Atoi(parts[0])
+        end, _ := strconv.Atoi(parts[1])
+
+        intervals = append(intervals, interval{ start, end })
+    }
+
+    // Sort by each internal start value
+    sort.Slice(intervals, func(i, j int) bool {
+        return intervals[i].start < intervals[j].start
+    })
+
+    // Merge the intervals
+    merged := []interval{}
+    for _, interval := range intervals {
+        num := len(merged)
+
+        if num == 0 || interval.start > merged[num - 1].end + 1 {
+            merged = append(merged, interval)
+        } else {
+            if interval.end > merged[num - 1].end {
+                merged[num - 1].end = interval.end
+            }
+        }
+    }
+
+    // Sum the total difference between each merge range
+    total := 0
+
+    for _, currentMerge := range merged {
+        total += currentMerge.end - currentMerge.start + 1
+    }
+
+    return total
 }

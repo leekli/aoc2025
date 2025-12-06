@@ -137,7 +137,7 @@ func TestGetTotalFreshAvailableIngredients_ReturnsTotal(test *testing.T) {
 	assert.Equal(test, 3, output, "Expected: 3, Received: %s", output)
 }
 
-func TestPart1_ReturnsTotal(test *testing.T) {
+func TestPart1_ReturnsTotal_IncludingTestInput(test *testing.T) {
 	input := `12-18
 
 1`
@@ -169,4 +169,64 @@ func TestPart1_ReturnsTotal(test *testing.T) {
 	output = Part1(input)
 
 	assert.Equal(test, 3, output, "Expected: 3, Received: %s", output)
+}
+
+func TestGetTotalUniqueIDsInRanges_ReturnsUniqueIDsInArray(test *testing.T) {
+	idRanges, _ := GetIngredientsData(`1-2
+
+1`)
+
+	output := GetTotalUniqueIDsInRanges(idRanges)
+
+	assert.Equal(test, 2, output, "Expected: 2, Received: %s", output)
+
+	idRanges, _ = GetIngredientsData(`3-5
+10-14
+16-20
+12-18
+
+1
+5
+8
+11
+17
+32`)
+
+	output = GetTotalUniqueIDsInRanges(idRanges)
+
+	assert.Equal(test, 14, output, "Expected: 14, Received: %s", output)
+}
+
+func TestPart2_ReturnsTotal_IncludingTestInput(test *testing.T) {
+	input := `12-18
+
+1`
+
+	output := Part2(input)
+
+	assert.Equal(test, 7, output, "Expected: 7, Received: %s", output)
+
+	input = `5-7
+
+13`
+
+	output = Part2(input)
+
+	assert.Equal(test, 3, output, "Expected: 3, Received: %s", output)
+
+	input = `3-5
+10-14
+16-20
+12-18
+
+1
+5
+8
+11
+17
+32`
+
+	output = Part2(input)
+
+	assert.Equal(test, 14, output, "Expected: 14, Received: %s", output)
 }
