@@ -22,9 +22,9 @@ func main() {
 	fmt.Printf("Day 6, Part 1 Output: %d\n", p1Output)
 
 	// Part 2
-	//p2Output := Part2(rawInput)
+	p2Output := Part2(rawInput)
 
-	//fmt.Printf("Day 6, Part 2 Output: %d\n", p2Output)
+	fmt.Printf("Day 6, Part 2 Output: %d\n", p2Output)
 }
 
 func Part1(input string) int {
@@ -43,6 +43,14 @@ func Part1(input string) int {
 
 func Part2(input string) int {
 	total := 0
+
+	operationsList := ConvertInputRightToLeftToOperations(input)
+
+	for i := 0; i < len(operationsList); i++ {
+		sum := GetTotalForCurrentOperation(operationsList[i])
+
+		total += sum
+	}
 
 	return total
 }
@@ -141,4 +149,95 @@ func GetTotalForCurrentOperation(operation Operation) int {
     default:
         return 0 
     }
+}
+
+func ConvertInputRightToLeftToOperations(input string) []Operation {
+    operationsList := []Operation{}
+
+	lines := strings.Split(input, "\n")
+
+	// Turn the `lines` above into seperate 2d array, each 2d array contains all numbers, no whitespace trimmed this time to try align each number up
+	allOperations := [][]string{}
+
+	for i := 0; i < len(lines); i++ {
+		currentOperation := []string{}
+
+		splitLine := strings.Split(lines[i], "")
+
+		currentOperation = append(currentOperation, splitLine...)
+
+		allOperations = append(allOperations, currentOperation)
+	}
+
+	maxCols := len(allOperations[0])
+	numRows := len(allOperations)
+	col := 0
+
+	for col < maxCols {
+		// Skip separator columns (all spaces)
+		isSeparator := true
+
+		for row := 0; row < numRows; row++ {
+			if allOperations[row][col] != "" && allOperations[row][col] != " " {
+				isSeparator = false
+				break
+			}
+		}
+
+		if isSeparator {
+			col++
+
+			continue
+		}
+
+		// Build up groups of non-separator columns
+		groupCols := []int{}
+		for col < maxCols {
+			isSeparator := true
+			for row := 0; row < numRows; row++ {
+				if allOperations[row][col] != "" && allOperations[row][col] != " " {
+					isSeparator = false
+
+					break
+				}
+			}
+
+			if isSeparator {
+				break
+			}
+
+			groupCols = append(groupCols, col)
+			col++
+		}
+
+		// Get the numbers and add to struct .Numbers field
+		op := Operation{}
+
+		for _, col := range groupCols {
+			numStr := ""
+
+			for row := 0; row < numRows - 1; row++ { // skip operator
+				currentElem := allOperations[row][col]
+
+				if currentElem != "" && currentElem != " " {
+					numStr += currentElem
+				}
+			}
+
+			if numStr != "" {
+				// Convert to actual number/int
+				num, _ := strconv.Atoi(numStr)
+
+				op.Numbers = append(op.Numbers, num)
+
+			}
+		}
+
+		// Get the Operator (at the bottom row of the last column in the group) and add to .Op field
+		op.Op = allOperations[numRows - 1][groupCols[0]]
+
+		operationsList = append(operationsList, op)
+	}
+
+    return operationsList
 }

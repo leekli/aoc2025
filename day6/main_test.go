@@ -108,3 +108,43 @@ func TestPart1_ReturnsCorrectTotal(test *testing.T) {
 
 	assert.Equal(test, 4277556, output, "Expected: 4277556, Received: %s", output)
 }
+
+func TestConvertInputRightToLeftToOperations_ProducesCorrectFormat(test *testing.T) {
+	input := `123
+ 45
+  6
+*  `
+
+	output := ConvertInputRightToLeftToOperations(input)
+
+	assert.Equal(test, 1, len(output), "Expected: 1, Received: %s", len(output))
+
+	input = `123 328  51 64 
+ 45 64  387 23 
+  6 98  215 314
+*   +   *   +  `
+
+	output = ConvertInputRightToLeftToOperations(input)
+
+	assert.Equal(test, 4, len(output), "Expected: 4, Received: %s", len(output))
+}
+
+func TestPart2_ReturnsCorrectTotal(test *testing.T) {
+	input := `123
+ 45
+  6
+*  `
+
+	output := Part2(input)
+
+	assert.Equal(test, 8544, output, "Expected: 8544, Received: %s", output)
+
+	input = `123 328  51 64 
+ 45 64  387 23 
+  6 98  215 314
+*   +   *   +  `
+
+	output = Part2(input)
+
+	assert.Equal(test, 3263827, output, "Expected: 3263827, Received: %s", output)
+}
