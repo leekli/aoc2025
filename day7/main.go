@@ -20,9 +20,9 @@ func main() {
 	fmt.Printf("Day 7, Part 1 Output: %d\n", p1Output)
 
 	// Part 2
-	//p2Output := Part2(rawInput)
+	p2Output := Part2(rawInput)
 
-	//fmt.Printf("Day 7, Part 2 Output: %d\n", p2Output)
+	fmt.Printf("Day 7, Part 2 Output: %d\n", p2Output)
 }
 
 func Part1(input string) int {
@@ -39,6 +39,12 @@ func Part1(input string) int {
 
 func Part2(input string) int {
 	total := 0
+
+	gridArray := StringTo2DArray(input)
+
+	splitCount := CountTimeLines(gridArray)
+
+	total += splitCount
 
 	return total
 }
@@ -158,4 +164,108 @@ func CountTotalSplits(grid [][]string) int {
 	}
 
 	return totalSplits
+}
+
+type DropCacheObj struct {
+	row int
+	locationType string
+}
+
+func CountTimeLines(grid [][]string) int {
+	gridHeight := len(grid)
+	gridWidth := len(grid[0])
+
+	totalTimelines := 0
+
+	// Create a 2D grid (initally all set to 0) to track number of ways each grid element gets visited
+	ways := make([][]int, gridHeight)
+
+	for i := range ways {
+		ways[i] = make([]int, gridWidth) 
+	}
+
+	// Find where the tacyon beam enters the manifold ('S' on grid) and add this to our 'ways' array to track the starting location is visited initally
+	startingBeamColPos := FindStartingBeam(grid)
+
+	ways[0][startingBeamColPos] = 1
+
+	// Create a drop cache (used to track purely vertical drops until it hits either a splitter or the bottom of the grid), allows faster scanner downwards
+	dropCache := make([][]DropCacheObj, gridHeight)
+
+	for i := range dropCache {
+		dropCache[i] = make([]DropCacheObj, gridWidth) 
+	}
+
+	for row := 0; row < gridHeight; row++ {
+		for col := 0; col < gridWidth; col++ {
+			currentCount := ways[row][col]
+
+			if currentCount == 0 {
+				continue
+			}
+
+			dropInfo := Drop(row, col, grid, gridHeight, gridWidth, dropCache)
+
+			if dropInfo.locationType == "bottom" {
+				// We're at the bottom of the grid
+				ways[dropInfo.row][col] += currentCount
+			} else {
+				// We've hit a splitter
+				spliterRow := dropInfo.row
+
+				// Sort the left beam (check it's within bounds)
+				if col - 1 >= 0 {
+					ways[spliterRow][col - 1] += currentCount
+				}
+
+				// Sort the right beam (check it's within bounds)
+				if col + 1 < gridWidth {
+					ways[spliterRow][col + 1] += currentCount
+				}
+			}
+		}
+	}
+
+	// Sum up everything on bottom row, need halve it for this challenge as each splitter hit has been split in 2
+	sum := 0
+
+	for i := 0; i < len(ways[0]); i++ {
+		sum += ways[len(ways) - 1][i]
+	}
+
+	sum = sum / 2
+
+	totalTimelines = sum
+
+	return totalTimelines
+}
+
+func Drop(row int, col int, mainGrid [][]string, mainGridHeight, mainGridWidth int, dropCache [][]DropCacheObj) DropCacheObj {
+	// Check if the value is cached, return if so
+	cachedItem := dropCache[row][col]
+
+	if cachedItem.locationType != "" && cachedItem.row >= 0 {
+		return cachedItem
+	}
+
+	newRow := row
+
+	// Fall through the grid now until we hit either a splitter or bottom of the grid
+	for newRow + 1 < mainGridHeight && mainGrid[newRow + 1][col] == "." {
+		newRow++
+	}
+
+	result := DropCacheObj{}
+
+	if newRow + 1 >= mainGridHeight {
+		result.row = newRow
+		result.locationType = "bottom"
+	} else {
+		result.row = newRow + 1
+		result.locationType = "splitter"
+	}
+
+	dropCache[row][col] = result
+
+	return result
 }
